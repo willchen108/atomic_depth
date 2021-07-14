@@ -72,6 +72,20 @@ cpp_to_numpy( std::vector<size_t> const & points ) {
     return result_array;
 }
 
+py::array_t<int>
+cpp_to_numpy( std::vector<int> const & points ) {
+
+    py::array_t<int> result_array = py::array_t<int> ( points.size() );
+    py::buffer_info result_array_buffer = result_array.request();
+    int * result_array_ptr = (int *) result_array_buffer.ptr;
+
+    for ( int i = 0; i < points.size(); i++ ) {
+    	result_array_ptr[i] = points[i];
+    }
+
+    return result_array;
+}
+
 py::array_t<double>
 cpp_xyz_to_numpy( std::vector<point3d> const & points ) {
 
@@ -249,6 +263,15 @@ AtomicDepth::get_surface_vertex_normals() {
 		points[i].z = verts_[i].pn.z;
 	}
 	return cpp_xyz_to_numpy(points); 
+}
+
+py::array_t<int> 
+AtomicDepth::get_surface_vertex_atom_indices() {
+	std::vector<int> indices( verts_.size() );
+	for ( size_t i = 0; i < verts_.size(); i++ ) {
+		indices[i] = verts_[i].atomid;
+	}
+	return cpp_to_numpy(indices); 
 }
 
 py::array_t<size_t> 
@@ -469,9 +492,11 @@ void AtomicDepth::initpara( std::vector<point3d> const & points, std::vector<dou
 	cutradis_=proberadius_*scalefactor_;
 }
 // Fill the 9 voxels centered at this xyz with .inout = true
-void AtomicDepth::fillatom( point3d const & point, double radius )
+void AtomicDepth::fillatom( point3d const & point, double radius, int indx, std::vector<point3d> const & points )
 {
+	int tind;
 	int cx,cy,cz;
+	int ox,oy,oz;
 	point3d cp;
 	cp.x=point.x+ptran_.x;
 	cp.y=point.y+ptran_.y;
@@ -507,8 +532,25 @@ void AtomicDepth::fillatom( point3d const & point, double radius )
 										continue;
 									}
 
-									if ( vp_[si][sj][sk].inout==false ) {
+									if ( ! vp_[si][sj][sk].inout ) {
 										vp_[si][sj][sk].inout=true;
+										vp_[si][sj][sk].atomid=indx;
+
+									} else {
+
+										tind=vp_[si][sj][sk].atomid;
+										cp.x=points.at(tind).x+ptran_.x;
+										cp.y=points.at(tind).y+ptran_.y;
+										cp.z=points.at(tind).z+ptran_.z;
+										cp.x*=scalefactor_;
+										cp.y*=scalefactor_;
+										cp.z*=scalefactor_;
+										ox=int(cp.x+0.5)-si;
+										oy=int(cp.y+0.5)-sj;
+										oz=int(cp.z+0.5)-sk;
+										if(mi*mi+mj*mj+mk*mk<ox*ox+oy*oy+oz*oz) {
+											vp_[si][sj][sk].atomid=indx;
+										}
 									}
 								}//k
 
@@ -553,12 +595,13 @@ void AtomicDepth::fillvoxels( std::vector<point3d> const & points, std::vector<d
 				vp_[i][j][k].isdone=false;
 				vp_[i][j][k].isbound=false;
 				vp_[i][j][k].distance=-1;
+				vp_[i][j][k].atomid=-1;
 			}
 		}
 	}
 
 	for ( size_t i = 0; i < points.size(); i++ ) {
-		fillatom( points[i], radii[i] );
+		fillatom( points[i], radii[i], i, points );
 	}
 
 	for ( i=0; i<plength_; i++ ) {
@@ -701,6 +744,8 @@ void AtomicDepth::fastdistancemap(int type)
 							|| (vp_[i][j][k].isdone && vp_[i][j][k].distance>=cutradis_-0.50/(0.1+cutsf))//0.33  0.75/scalefactor_
 							) {
 						vp_[i][j][k].isbound=true;
+						if(vp_[i][j][k].isdone)
+							vp_[i][j][k].atomid=vp_[boundpoint[i][j][k].ix][boundpoint[i][j][k].iy][boundpoint[i][j][k].iz].atomid;
 					}
 				}
 			}
@@ -3939,7 +3984,7 @@ void AtomicDepth::marchingcube(int stype)
 	faces_.resize(facenumber);
 	for(i=0;i<vertnumber;i++)
 	{
-		// verts_[i].atomid=vp_[int(verts_[i].x)][int(verts_[i].y)][int(verts_[i].z)].atomid;
+		verts_[i].atomid=vp_[int(verts_[i].x)][int(verts_[i].y)][int(verts_[i].z)].atomid;
 		verts_[i].iscont=false;
 		if(vp_[int(verts_[i].x)][int(verts_[i].y)][int(verts_[i].z)].isbound)
 			verts_[i].iscont=true;

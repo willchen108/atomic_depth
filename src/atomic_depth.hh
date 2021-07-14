@@ -31,6 +31,7 @@ typedef struct volumepixel
 	bool inout;
 	bool isbound;
 	bool isdone;
+	int atomid;
 }volumepixel;
 typedef struct voxel
 {
@@ -68,6 +69,7 @@ public:
 
 	py::array_t<double> get_surface_vertex_bases();
 	py::array_t<double> get_surface_vertex_normals();
+	py::array_t<int> get_surface_vertex_atom_indices();
 	py::array_t<size_t> get_surface_face_vertices();
 	py::array_t<double> get_surface_face_centers();
 	py::array_t<double> get_surface_face_normals();
@@ -81,7 +83,7 @@ private:
 	void initpara( std::vector<point3d> const & points, std::vector<double> const & radii );
 	void fill_vp();
 	void fillvoxels( std::vector<point3d> const & points, std::vector<double> const & radii );
-	void fillatom(point3d const & point, double radius);
+	void fillatom(point3d const & point, double radius, int indx, std::vector<point3d> const & points);
 	void fastoneshell(int innum,int & allocout,std::vector<std::vector<std::vector<voxel2> > > & boundpoint,int & outnum, int & elimi);
 	void fastdistancemap(int type);
 	void buildboundary();
@@ -129,6 +131,7 @@ void declare_AtomicDepth(const py::module& m, const std::string& class_name) {
       .def("visualize_at_depth", &AtomicDepth::visualize_at_depth)
       .def("get_surface_vertex_bases", &AtomicDepth::get_surface_vertex_bases)
       .def("get_surface_vertex_normals", &AtomicDepth::get_surface_vertex_normals)
+      .def("get_surface_vertex_atom_indices", &AtomicDepth::get_surface_vertex_atom_indices)
       .def("get_surface_face_vertices", &AtomicDepth::get_surface_face_vertices)
       .def("get_surface_face_centers", &AtomicDepth::get_surface_face_centers)
       .def("get_surface_face_normals", &AtomicDepth::get_surface_face_normals)
