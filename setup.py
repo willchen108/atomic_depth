@@ -11,9 +11,9 @@ __version__ = '0.0.1'
 #     readme = readme_file.read()
 
 extra_compile_args_dict = {
-    'linux' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++17'],
-    'linux2' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++17'],
-    'darwin' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++17', '-stdlib=libc++'],
+    'linux' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++11'],
+    'linux2' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++11'],
+    'darwin' : ['-w', '-ftemplate-backtrace-limit=0', '-std=c++11', '-stdlib=libc++'],
 }
 
 ext_modules = [
