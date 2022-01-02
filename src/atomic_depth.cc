@@ -1331,9 +1331,15 @@ void AtomicDepth::computenorm()
 		pn.y=p12.z*p13.x-p12.x*p13.z;
 		pn.z=p12.x*p13.y-p12.y*p13.x;
 		faces_[i].area=0.5*sqrt(pn.x*pn.x+pn.y*pn.y+pn.z*pn.z);
-		faces_[i].pn.x=0.5*pn.x/faces_[i].area;
-		faces_[i].pn.y=0.5*pn.y/faces_[i].area;
-		faces_[i].pn.z=0.5*pn.z/faces_[i].area;
+		if ( faces_[i].area == 0.0 ) {
+			faces_[i].pn.x = 0;
+			faces_[i].pn.y = 0;
+			faces_[i].pn.z = 0;
+		} else {
+			faces_[i].pn.x=0.5*pn.x/faces_[i].area;
+			faces_[i].pn.y=0.5*pn.y/faces_[i].area;
+			faces_[i].pn.z=0.5*pn.z/faces_[i].area;
+		}
 		//*
 		//without area
 		verts_[faces_[i].a].pn.x+=faces_[i].pn.x;
