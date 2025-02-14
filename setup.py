@@ -4,6 +4,7 @@ import os
 import sys
 import setuptools
 import glob
+import pybind11
 
 __version__ = '0.0.2'
 
@@ -20,7 +21,7 @@ ext_modules = [
   Extension(
     "_atomic_depth",
     glob.glob('src/*.cc'),
-    include_dirs = [ 'src', 'lib/pybind11/include'],
+    include_dirs = [ 'src', pybind11.get_include()],
     language = 'c++',
     extra_compile_args = extra_compile_args_dict[sys.platform],
     extra_link_args = ['-lz'],
@@ -36,20 +37,8 @@ setup(
     description = 'Atomic Depth',
     packages = ['atomic_depth'],
     package_dir={'atomic_depth': 'atomic_depth'},
-    package_data={},
     ext_modules = ext_modules,
-    install_requires = ['numpy', 'pybind11'],
-    include_package_data=True,
-    zip_safe = False,
-    # long_description=readme,
-    long_description_content_type='text/markdown',
-    # url="https://github.com/atom-moyer/getpy",
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'Programming Language :: C++',
-        'Topic :: Scientific/Engineering',
-        'Topic :: Software Development',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: Unix'
+    install_requires=[
+        'pybind11>=2.10.0',  # Specify compatible pybind11 versions
     ],
 )

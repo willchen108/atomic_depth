@@ -7,7 +7,7 @@ the Software. It is provided "as is" without express or implied
 warranty.
 *////////////////////////////////////////////////////////////////
 
-
+#include <iostream> // Added by W.C.
 #include <atomic_depth.hh>
 #include <fstream>
 #include <stdio.h>
